@@ -1,0 +1,58 @@
+import json
+import os
+
+class SmartRobot:
+    def __init__(self, name, memory_file="robot_memory.json"):
+        self.name = name
+        self.memory_file = memory_file
+        
+        self.memory = self.load_memory()
+
+    def load_memory(self):
+       
+        if os.path.exists(self.memory_file):
+            try:
+                with open(self.memory_file, "r", encoding="utf-8") as f:
+                    return json.load(f)
+            except:
+                pass
+        
+       
+        return {
+            "hello": "Namaste! Main aapki kya madad kar sakta hoon?",
+            "aapka naam kya hai": f"Mera naam {self.name} hai.",
+            "tum kya kar sakte ho": "Main aapke diye gaye commands samajh sakta hoon aur baatein seekh sakta hoon!"
+        }
+
+    def save_memory(self):
+       
+        with open(self.memory_file, "w", encoding="utf-8") as f:
+            json.dump(self.memory, f, ensure_ascii=False, indent=4)
+
+    def speak(self, text):
+        print(f"🤖 {self.name}: {text}")
+
+    def listen_and_respond(self, user_input):
+        query = user_input.lower().strip()
+
+        if query in self.memory:
+            self.speak(self.memory[query])
+        else:
+            self.speak("Mujhe yeh samajh nahi aaya. Kya aap mujhe iska jawab sikhana chahenge?")
+            new_response = input("👉 Is command ka kya jawab hona chahiye? (Type karein): ")
+            
+            if new_response.strip():
+                self.memory[query] = new_response.strip()
+                self.save_memory()  
+                self.speak("Shukriya! Maine yeh naya command hamesha ke liye sikh liya hai.")
+
+bot = SmartRobot("Chitti")
+bot.speak(f"Hello! Main {bot.name} hoon. Meri memory ab permanent hai.")
+bot.speak("Exit karne ke liye 'bye' type karein.")
+
+while True:
+    user_says = input("\n👤 Aap: ")
+    if user_says.lower() == 'bye':
+        bot.speak("Alvida! Phir milenge.")
+        break
+    bot.listen_and_respond(user_says)
